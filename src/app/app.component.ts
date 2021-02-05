@@ -12,6 +12,8 @@ export class AppComponent implements OnInit {
   canvas: any;
   context: any;
   img_u8: any;
+  kernel_size: number;
+  alpha: number;
 
   constructor() {}
 
@@ -25,6 +27,11 @@ export class AppComponent implements OnInit {
     };
 
     this.img_u8 = new jsfeat.matrix_t(640, 480, jsfeat.U8C1_t);
+    /* tslint:disable:no-bitwise */
+    const r = 10 | 0;
+    this.kernel_size = (r + 1) << 1;
+    this.alpha = (0xff << 24);
+    /* tslint:enable:no-bitwise */
 
     this.videoStart();
   }
@@ -57,17 +64,16 @@ export class AppComponent implements OnInit {
     const imageData = this.context.getImageData(0, 0, 640, 480);
 
     jsfeat.imgproc.grayscale(imageData.data, 640, 480, this.img_u8);
-
-    const r = 10 | 0;
-    const kernel_size = (r+1) << 1;
-    jsfeat.imgproc.gaussian_blur(this.img_u8, this.img_u8, kernel_size, 0);
+    jsfeat.imgproc.gaussian_blur(this.img_u8, this.img_u8, this.kernel_size, 0);
 
     const data_u32 = new Uint32Array(imageData.data.buffer);
-    const alpha = (0xff << 24);
+
     let i = this.img_u8.cols * this.img_u8.rows, pix = 0;
-    while(--i >= 0) {
+    while (--i >= 0) {
         pix = this.img_u8.data[i];
-        data_u32[i] = alpha | (pix << 16) | (pix << 8) | pix;
+        /* tslint:disable:no-bitwise */
+        data_u32[i] = this.alpha | (pix << 16) | (pix << 8) | pix;
+        /* tslint:enable:no-bitwise */
     }
     this.context.putImageData(imageData, 0, 0);
 
