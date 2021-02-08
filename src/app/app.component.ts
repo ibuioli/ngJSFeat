@@ -27,11 +27,10 @@ export class AppComponent implements OnInit {
     };
 
     this.img_u8 = new jsfeat.matrix_t(640, 480, jsfeat.U8C1_t);
-    /* tslint:disable:no-bitwise */
-    const r = 10 | 0;
-    this.kernel_size = (r + 1) << 1;
-    this.alpha = (0xff << 24);
-    /* tslint:enable:no-bitwise */
+
+    // Data for avoid recalculation
+    this.kernel_size = 22;
+    this.alpha = -16777216;
 
     this.videoStart();
   }
